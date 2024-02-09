@@ -1,0 +1,70 @@
+---
+title: "Visceral Leishmaniasis Distribution"
+author: "Harry Wilson"
+date: "2024-02-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This R Markdown document exhibits the code used to generate maps of visceral leishmaniasis (VL) cases both globally and surrounding the Mediterranean basin. These charts display data gathered by Pigott et al. (2014) and focus on the European region.
+
+### Packages
+You will require the following packages in order to run the code
+
+```{r packages, warning = FALSE}
+# Install Packages
+library(ggplot2)
+library(maps)
+```
+
+
+### Data
+Data is taken from Pigott et al (2014) and can be downloaded [here](https://datadryad.org/stash/dataset/doi:10.5061/dryad.05f5h)
+
+```{r map data, warning = FALSE}
+# Creates a directory called "Data" within your working directory
+dir.create("Data")
+
+# Reads in csv file
+VL_data <- read.csv("Data/VL_final_dataset.csv")
+
+# Read in world coordinates from maps package
+world_coordinates <- map_data("world") 
+```
+
+## European Mapping
+
+This map displays coordinates of recorded VL cases surrounding the Mediterranean basin.
+
+```{r maps, warning = FALSE}
+
+ggplot() + 
+  
+  geom_map( data = world_coordinates, map = world_coordinates, aes(long, lat, map_id = region,), 
+            color = "black", fill = "darkseagreen4", linewidth = 0.3 )+
+            xlim(-11, 45)+ ylim(28, 65)+
+  
+  geom_map( data = VL_data, map = world_coordinates, aes(`X`, `Y`, map_id = COUNTRY,), 
+            color = "black", fill = "salmon", linewidth = 0.3 )+
+  
+  geom_point(data = VL_data, aes(`X`, `Y`, group=YEAR, fill = YEAR), shape = 21, size=2, stroke = 0.3)+
+  
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red",midpoint = 1990, 
+                       space = "Lab", na.value = "grey50", guide = "colourbar", aesthetics = "fill")+
+  
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+        panel.background = element_rect(fill = "cornflowerblue"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  
+  # Titles
+  annotate(geom = "label", x=4, y=64, label="Recorded Cases of Visceral Leishmaniasis",color="black", fill = "white", size = 6)+
+  annotate(geom = "label", x=1.9, y=62, label="Source: Global database of leishmaniasis occurrence locations, 1960–2012",color="black", fill = "white", size = 3)
+
+```
